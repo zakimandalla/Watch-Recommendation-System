@@ -1,7 +1,6 @@
 import sys
-import typing
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QDialog, QApplication, QWidget
+from PyQt5.QtWidgets import QDialog, QApplication, QTableWidgetItem
 from PyQt5.uic import loadUi
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
@@ -306,6 +305,23 @@ class Profile(QDialog):
         super(Profile, self).__init__()
         loadUi('profile.ui', self)
         self.backbtn.clicked.connect(self.goto_mainmenu)
+        products = [
+            {'name':'Avatar', 'type':'Movie'},
+            {'name': 'One Punch Man', 'type': 'Anime'},
+            {'name': 'Naruto', 'type': 'Anime'},
+            {'name': 'Goblin', 'type': 'Drama'},
+        ]
+
+        self.tableWidget.setRowCount(len(products))
+        self.tableWidget.setColumnCount(2)
+
+        self.tableWidget.setHorizontalHeaderLabels(('Title','Type'))
+
+        row_index = 0
+        for product in products:
+            self.tableWidget.setItem(row_index,0,QTableWidgetItem(str(product['name'])))
+            self.tableWidget.setItem(row_index,1,QTableWidgetItem(str(product['type'])))
+            row_index += 1
 
 
     def goto_mainmenu(self):
@@ -316,7 +332,7 @@ class Profile(QDialog):
 
 class RecomAnime:
     def __init__(self):
-        self.df_anime = pd.read_csv('Anime Genres for 20.csv')
+        self.df_anime = pd.read_csv('data/Anime Genres for 20.csv')
         
     def recommend(self, anime_picked):
         pick_data = self.df_anime[self.df_anime['Title'].isin(anime_picked)] #data anime terpilih
@@ -336,7 +352,7 @@ class RecomAnime:
     
 class RecomKdrama:
     def __init__(self):
-        self.df_kdrama = pd.read_csv('Korean Drama Synopsis 20.csv')
+        self.df_kdrama = pd.read_csv('data/Korean Drama Synopsis 20.csv')
         self.encoder = None
         self.bank_kdrama = None
 
@@ -363,14 +379,13 @@ class RecomKdrama:
     
 class RecomMovie:
     def __init__(self):
-        self.df_movie = pd.read_csv('Box Office 500.csv')
+        self.df_movie = pd.read_csv('data/Box Office 100.csv')
         self.encoder = None
         self.bank_movie = None
 
     def fit(self):
         self.encoder = CountVectorizer(stop_words='english', tokenizer=word_tokenize)
         self.bank_movie = self.encoder.fit_transform(self.df_movie['metadata'])
-        #progressbar.setValue(80)
 
     def recommend(self, movie_picked):
         pick_idx = self.df_movie.index[self.df_movie['title'].isin(movie_picked)].to_list()
